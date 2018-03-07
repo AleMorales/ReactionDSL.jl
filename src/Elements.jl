@@ -37,5 +37,5 @@ struct Reaction
 end
 Base.isequal(r1::Reaction, r2::Reaction) = isequal(r1.formula, r2.formula) &&
     isequal(r1.rate, r2.rate)
-# Reactions created by pattern (Formula) == Operation
-Base.:(==)(f::Formula, o::Expression) = Reaction(f,o)
+# Reactions created by pattern (Formula) ~ Operation
+Base.:~(f::Formula, o::Expression) = Reaction(f,o)

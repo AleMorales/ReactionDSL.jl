@@ -23,7 +23,7 @@ f2 = Formula(:⟺, [Reactant(s1, Constant(2)), Reactant(s2, st)],
 
 # An actual reaction
 @Param k Keq
-r1 = (2s1 + st*s2 ⟺ s3) == k*(s1*s2 - s3/Keq)
+r1 = 2s1 + st*s2 ⟺ s3 ~ k*(s1*s2 - s3/Keq)
 op = k*(s1*s2 - s3/Keq)
 r2 = Reaction(f1, op)
 @test isequal(r1, r2)
@@ -32,9 +32,9 @@ r2 = Reaction(f1, op)
 @Param gₓ xₒ kₓ Kₑ vₛ Kₘ
 @IVar t
 @Species x y
-eq = [(∅ ⟺ x) == gₓ*(xₒ - x),
-      (x ⟺ y) == kₓ*(x - y/Kₑ),
-      (y ⟺ ∅) == vₛ*y/(Kₘ + y)]
+eq = [∅ ⟺ x ~ gₓ*(xₒ - x),
+      x ⟺ y ~ kₓ*(x - y/Kₑ),
+      y ⟺ ∅ ~ vₛ*y/(Kₘ + y)]
 ode1 = ReactionODE(eq, t)
 generate_ode_function(ode1)
 
@@ -43,10 +43,10 @@ generate_ode_function(ode1)
 @DVar vₛ # overrides previous definition
 @Var vₛₛₛ
 @Deriv D'~t
-eq2 = [(∅ ⟺ x) == gₓ*(xₒ - x),
-      (x ⟺ y) == kₓ*(x - y/Kₑ),
-      vₛₛₛ == vₛₘ*xₒ/(vₛ + xₒ),
-      D*vₛ == (vₛ - vₛₛₛ)*kₐ,
-      (y ⟺ ∅) == vₛ*y/(Kₘ + y)]
+eq2 = [∅ ⟺ x ~ gₓ*(xₒ - x),
+       x ⟺ y ~ kₓ*(x - y/Kₑ),
+       vₛₛₛ ~ vₛₘ*xₒ/(vₛ + xₒ),
+       D*vₛ ~ (vₛ - vₛₛₛ)*kₐ,
+       y ⟺ ∅ ~ vₛ*y/(Kₘ + y)]
 ode2 = ReactionODE(eq2, t)
 generate_ode_function(ode2)

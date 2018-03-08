@@ -50,3 +50,11 @@ eq2 = [∅ ⟺ x ~ gₓ*(xₒ - x),
        y ⟺ ∅ ~ vₛ*y/(Kₘ + y)]
 ode2 = ReactionODE(eq2, t)
 generate_ode_function(ode2)
+
+# Transport across compartments
+@Param kf kb V₁ Vₘ V₂
+s₁ = Species(:s₁) ∈ V₁
+s₂ = Species(:s₂) ∈ V₂
+eq3 = [(s₁ ⟺ s₂) ∈ Vₘ ~ kf*s₁ - kb*s₂]
+ode3 = ReactionODE(eq3, t)
+generate_ode_function(ode3)

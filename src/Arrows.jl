@@ -1,7 +1,7 @@
 export ⟺
 
 # All possible operands of an arrow operator
-const ReactionSide = Union{Environment, SciCompDSL.Operation, SciCompDSL.Variable}
+const ReactionSide = Union{Environment, SciCompDSL.Operation, Species}
 
 # ⟺ No assumption of mass kinetics, assumes reaction reversible
 ⟺(lhs::ReactionSide, rhs::ReactionSide) = arrowop(:⟺, lhs, rhs)
@@ -15,18 +15,21 @@ const open = Dict(:⟺ => true)
 # Determines whether arrow is reversible or not
 const reversible = Dict(:⟺ => true)
 
-# Create a Formula from an arrow operator
+# Create a Formula from an arrow operator. Inherit compartment from first species
 function arrowop(arrow::Symbol, lhs::ReactionSide, rhs::ReactionSide)
+    reactlhs = getreactants(lhs)
+    reactrhs = getreactants(rhs)
+    compartment = length(reactlhs) > 0 ? reactlhs[1].species.compartment : reactrhs[1].species.compartment
     if forward[arrow]
-        Formula(arrow, getreactants(lhs), getreactants(rhs))
+        Formula(arrow, compartment, reactlhs, reactrhs)
     else
-        Formula(arrow, getreactants(rhs), getreactants(lhs))
+        Formula(arrow, compartment, reactrhs, reactlhs)
     end
 end
 
 # Parsing the AST of the formula (limited DSL)
 getreactants(r::Environment) = Reactant[]
-getreactants(r::SciCompDSL.Variable) = [Reactant(r, SciCompDSL.Constant(1))]
+getreactants(r::Species) = [Reactant(r, SciCompDSL.Constant(1))]
 function getreactants(r::SciCompDSL.Operation)
     if r.op == +
         return [getreactants(arg)[1] for arg in r.args]

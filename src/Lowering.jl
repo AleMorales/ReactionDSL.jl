@@ -32,7 +32,7 @@ function create_derivatives!(reactions, neqns, iv)
     spnames, species = get_species(reactions)
     # Create derivatives for remaining species
     D = Differential(iv, 1)
-    derivs = [D*dvar_species(sp) == 1 for sp in species]
+    derivs = [D*DependentVariable(sp) == 1 for sp in species]
     return spnames, derivs
 end
 
@@ -40,7 +40,7 @@ end
 # Retrieve species used as reactants in reaction formulae
 function get_species(reactions::Vector{Reaction})
     spnames = Symbol[]
-    species = Variable[]
+    species = Species[]
     for reaction in reactions
         form = reaction.formula
         for react in vcat(form.substrates, form.products)
@@ -71,29 +71,33 @@ end
 # dir indicates whether to substractor add the rate equation
 function expand_derivatives!(react, reaction, spnames, derivs, arrow, dir)
     pos = findfirst(spnames, react.species.name)
-    derivs[pos].args[2] += dir*create_rate(react, reaction, arrow)
+    derivs[pos].args[2] *= dir*create_rate(react, reaction, arrow)
 end
 
 
-# Create a rate expression depending on the type of arrow
+# Create a rate expression depending on the type of arrow and differences in compartments
 function create_rate(react, reaction, arrow)
+    sc = react.species.compartment
+    fc = reaction.formula.compartment
+    compcorr = sc == fc ? false : true
     if open[arrow]
         if reversible[arrow]
-            react.stoich*reaction.rate
+            out = compcorr ? react.stoich*reaction.rate*fc/sc : react.stoich*reaction.rate
         else
             error("only reversible arrows implemented")
         end
     else
         error("closed arrows not implemented") # Here we would use mass action kinetics
     end
+    return out
 end
 
 # Convert all Species into DependentVariable
 function convert_species!(eqn::Operation)
     for i in 1:length(eqn.args)
         arg = eqn.args[i]
-        if arg isa Variable && arg.subtype == :Species
-            eqn.args[i] = dvar_species(arg)
+        if arg isa Species
+            eqn.args[i] = DependentVariable(arg)
         elseif arg isa Operation
             convert_species!(eqn.args[i])
         end

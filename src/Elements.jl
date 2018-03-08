@@ -27,15 +27,15 @@ struct Formula
     substrates::Vector{Reactant}
     products::Vector{Reactant}
 end
-Base.isequal(r1::Formula, r2::Formula) = isequal(r1.substrates, r2.substrates) &&
-    isequal(r1.products, r2.products) && isequal(r1.arrow, r2.arrow)
+Base.:(==)(r1::Formula, r2::Formula) = r1.substrates == r2.substrates &&
+    r1.products == r2.products && r1.arrow == r2.arrow
 
 # Reaction holds formula and its rate equation in SciComp IR
 struct Reaction
     formula::Formula
     rate::Expression
 end
-Base.isequal(r1::Reaction, r2::Reaction) = isequal(r1.formula, r2.formula) &&
-    isequal(r1.rate, r2.rate)
+Base.:(==)(r1::Reaction, r2::Reaction) = r1.formula == r2.formula &&
+    r1.rate == r2.rate
 # Reactions created by pattern (Formula) ~ Operation
 Base.:~(f::Formula, o::Expression) = Reaction(f,o)
